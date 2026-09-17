@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: servico-vendas-veiculos
+  labels:
+    app: servico-vendas-veiculos
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: servico-vendas-veiculos
+  template:
+    metadata:
+      labels:
+        app: servico-vendas-veiculos
+    spec:
+      containers:
+        - name: servico-vendas-veiculos
+          image: servico-vendas-veiculos:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8082
+              name: http
+          envFrom:
+            - configMapRef:
+                name: servico-vendas-veiculos-config
+            - secretRef:
+                name: servico-vendas-veiculos-secret
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8082
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8082
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
