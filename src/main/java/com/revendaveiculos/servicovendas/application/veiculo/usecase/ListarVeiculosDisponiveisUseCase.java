@@ -6,6 +6,7 @@ import com.revendaveiculos.servicovendas.application.veiculo.port.in.ListarVeicu
 import com.revendaveiculos.servicovendas.application.veiculo.port.out.VeiculoRepositoryPort;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -22,6 +23,7 @@ public class ListarVeiculosDisponiveisUseCase implements ListarVeiculosDisponive
     @Override
     public List<VeiculoResponse> listar() {
         return veiculoRepositoryPort.listarDisponiveis().stream()
+                .sorted(Comparator.comparing(veiculo -> veiculo.getPreco().valor()))
                 .map(veiculoMapper::paraResponse)
                 .toList();
     }

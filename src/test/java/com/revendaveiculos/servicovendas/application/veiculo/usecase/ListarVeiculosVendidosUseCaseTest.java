@@ -39,4 +39,25 @@ class ListarVeiculosVendidosUseCaseTest {
         assertThat(resultado).hasSize(1);
         assertThat(resultado.get(0).status()).isEqualTo("VENDIDO");
     }
+
+    @Test
+    void deveOrdenarVeiculosVendidosPorPrecoCrescente() {
+        ListarVeiculosVendidosUseCase useCase =
+                new ListarVeiculosVendidosUseCase(veiculoRepositoryPort, veiculoMapper);
+
+        // Propositalmente fora de ordem e com o mais barato no meio da lista,
+        // para garantir que o UseCase ordena e nao so preserva a ordem de entrada.
+        Veiculo caro = Veiculo.restaurar(1L, "BMW", "X5", 2023, "Preto",
+                Preco.de(BigDecimal.valueOf(450000)), StatusVeiculo.VENDIDO);
+        Veiculo barato = Veiculo.restaurar(2L, "Fiat", "Uno", 2020, "Branco",
+                Preco.de(BigDecimal.valueOf(35000)), StatusVeiculo.VENDIDO);
+        Veiculo medio = Veiculo.restaurar(3L, "Honda", "Civic", 2023, "Preto",
+                Preco.de(BigDecimal.valueOf(110000)), StatusVeiculo.VENDIDO);
+        when(veiculoRepositoryPort.listarVendidos()).thenReturn(List.of(caro, barato, medio));
+
+        List<VeiculoResponse> resultado = useCase.listar();
+
+        assertThat(resultado).extracting(VeiculoResponse::id).containsExactly(2L, 3L, 1L);
+        assertThat(resultado).extracting(VeiculoResponse::preco).isSortedAccordingTo(BigDecimal::compareTo);
+    }
 }
