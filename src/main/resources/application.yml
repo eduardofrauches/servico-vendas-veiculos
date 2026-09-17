@@ -1,0 +1,30 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: servico-vendas-veiculos
+
+  datasource:
+    # Banco fisicamente separado do sistema-principal: container Postgres
+    # proprio, exposto na porta 5433 do host (ver docker-compose.yml na raiz).
+    url: jdbc:postgresql://localhost:5433/veiculos_vendas_db
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      # "update" nesta etapa inicial (sem Flyway/Liquibase ainda) so para
+      # o schema ser criado automaticamente a partir das *Entity JPA.
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
+# URL base do sistema-principal-veiculos, usado pelo SistemaPrincipalHttpAdapter
+# para notificar o resultado final de uma venda.
+sistema-principal:
+  base-url: ${SISTEMA_PRINCIPAL_BASE_URL:http://localhost:8081}

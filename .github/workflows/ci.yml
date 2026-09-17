@@ -1,0 +1,100 @@
+name: CI
+
+# Workflow unico e direto neste repositorio (sem reusable-actions por
+# enquanto — sao so 2 microsservicos, mais simples de revisar e ter
+# certeza que funciona). Todo caminho referenciado abaixo (Dockerfile,
+# pom.xml, mvnw) existe na raiz deste proprio repositorio.
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  checks:
+    name: checks (lint basico)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Tornar mvnw executavel
+        run: chmod +x mvnw
+
+      - name: Validar projeto (pom.xml, estrutura de modulos)
+        run: ./mvnw -B validate
+
+  build:
+    name: build
+    needs: checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Tornar mvnw executavel
+        run: chmod +x mvnw
+
+      - name: Compilar e empacotar (sem rodar testes)
+        run: ./mvnw -B -DskipTests clean package
+
+  test_quality:
+    name: test_quality
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Tornar mvnw executavel
+        run: chmod +x mvnw
+
+      # Roda os testes (unitarios + integracao com Testcontainers + BDD
+      # com Cucumber — o runner ubuntu-latest ja tem Docker instalado)
+      # e o gate de cobertura minima de 80% via jacoco:check, que esta
+      # configurado no pom.xml deste projeto bound a fase "verify".
+      - name: Rodar testes e verificar cobertura minima (mvnw verify)
+        run: ./mvnw -B verify
+
+      - name: Publicar relatorio de cobertura (JaCoCo)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: target/site/jacoco/
+
+  docker:
+    name: docker (build da imagem)
+    needs: test_quality
+    runs-on: ubuntu-latest
+    # So builda a imagem quando o push for direto na branch main
+    # (merge), nunca em pull request.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build da imagem Docker (Dockerfile na raiz deste repositorio)
+        run: docker build -t servico-vendas-veiculos:${{ github.sha }} .
