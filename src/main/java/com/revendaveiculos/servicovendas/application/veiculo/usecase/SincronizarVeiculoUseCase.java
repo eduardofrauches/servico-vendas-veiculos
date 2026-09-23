@@ -1,7 +1,6 @@
 package com.revendaveiculos.servicovendas.application.veiculo.usecase;
 
 import com.revendaveiculos.servicovendas.application.veiculo.dto.request.SincronizarVeiculoRequest;
-import com.revendaveiculos.servicovendas.application.veiculo.dto.response.VeiculoResponse;
 import com.revendaveiculos.servicovendas.application.veiculo.mapper.VeiculoMapper;
 import com.revendaveiculos.servicovendas.application.veiculo.port.in.SincronizarVeiculoInputPort;
 import com.revendaveiculos.servicovendas.application.veiculo.port.out.VeiculoRepositoryPort;
@@ -24,9 +23,8 @@ public class SincronizarVeiculoUseCase implements SincronizarVeiculoInputPort {
     }
 
     @Override
-    public VeiculoResponse sincronizar(SincronizarVeiculoRequest request) {
+    public Veiculo sincronizar(SincronizarVeiculoRequest request) {
         Veiculo veiculo = veiculoMapper.paraDominio(request);
-        Veiculo veiculoSalvo = veiculoRepositoryPort.salvar(veiculo);
-        return veiculoMapper.paraResponse(veiculoSalvo);
+        return veiculoRepositoryPort.salvar(veiculo);
     }
 }

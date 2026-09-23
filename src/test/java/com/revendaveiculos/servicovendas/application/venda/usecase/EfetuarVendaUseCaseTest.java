@@ -1,8 +1,6 @@
 package com.revendaveiculos.servicovendas.application.venda.usecase;
 
 import com.revendaveiculos.servicovendas.application.venda.dto.request.EfetuarVendaRequest;
-import com.revendaveiculos.servicovendas.application.venda.dto.response.VendaResponse;
-import com.revendaveiculos.servicovendas.application.venda.mapper.VendaMapper;
 import com.revendaveiculos.servicovendas.application.venda.port.out.SistemaPrincipalPort;
 import com.revendaveiculos.servicovendas.application.venda.port.out.VendaRepositoryPort;
 import com.revendaveiculos.servicovendas.application.veiculo.port.out.VeiculoRepositoryPort;
@@ -11,6 +9,7 @@ import com.revendaveiculos.servicovendas.domain.exception.VeiculoNaoDisponivelEx
 import com.revendaveiculos.servicovendas.domain.exception.VeiculoNaoEncontradoException;
 import com.revendaveiculos.servicovendas.domain.model.veiculo.StatusVeiculo;
 import com.revendaveiculos.servicovendas.domain.model.veiculo.Veiculo;
+import com.revendaveiculos.servicovendas.domain.model.venda.StatusVenda;
 import com.revendaveiculos.servicovendas.domain.model.venda.Venda;
 import com.revendaveiculos.servicovendas.domain.vo.Preco;
 import org.junit.jupiter.api.Test;
@@ -39,8 +38,6 @@ class EfetuarVendaUseCaseTest {
     @Mock
     private SistemaPrincipalPort sistemaPrincipalPort;
 
-    private final VendaMapper vendaMapper = new VendaMapper();
-
     private EfetuarVendaUseCase useCase;
 
     private Veiculo veiculoDisponivel() {
@@ -50,17 +47,17 @@ class EfetuarVendaUseCaseTest {
 
     @Test
     void deveEfetuarVendaReservarVeiculoENotificarSistemaPrincipal() {
-        useCase = new EfetuarVendaUseCase(veiculoRepositoryPort, vendaRepositoryPort, sistemaPrincipalPort, vendaMapper);
+        useCase = new EfetuarVendaUseCase(veiculoRepositoryPort, vendaRepositoryPort, sistemaPrincipalPort);
 
         Veiculo veiculo = veiculoDisponivel();
         when(veiculoRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(veiculo));
         when(vendaRepositoryPort.salvar(any(Venda.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        VendaResponse response = useCase.efetuar(new EfetuarVendaRequest(1L, "529.982.247-25"));
+        Venda response = useCase.efetuar(new EfetuarVendaRequest(1L, "529.982.247-25"));
 
-        assertThat(response.veiculoId()).isEqualTo(1L);
-        assertThat(response.status()).isEqualTo("PENDENTE");
-        assertThat(response.codigoPagamento()).isNotBlank();
+        assertThat(response.getVeiculoId()).isEqualTo(1L);
+        assertThat(response.getStatus()).isEqualTo(StatusVenda.PENDENTE);
+        assertThat(response.getCodigoPagamento()).isNotBlank();
 
         ArgumentCaptor<Veiculo> veiculoCaptor = ArgumentCaptor.forClass(Veiculo.class);
         verify(veiculoRepositoryPort).salvar(veiculoCaptor.capture());
@@ -71,7 +68,7 @@ class EfetuarVendaUseCaseTest {
 
     @Test
     void deveLancarExcecaoQuandoVeiculoNaoEncontrado() {
-        useCase = new EfetuarVendaUseCase(veiculoRepositoryPort, vendaRepositoryPort, sistemaPrincipalPort, vendaMapper);
+        useCase = new EfetuarVendaUseCase(veiculoRepositoryPort, vendaRepositoryPort, sistemaPrincipalPort);
 
         when(veiculoRepositoryPort.buscarPorId(99L)).thenReturn(Optional.empty());
 
@@ -83,7 +80,7 @@ class EfetuarVendaUseCaseTest {
 
     @Test
     void deveLancarExcecaoQuandoVeiculoNaoEstaDisponivel() {
-        useCase = new EfetuarVendaUseCase(veiculoRepositoryPort, vendaRepositoryPort, sistemaPrincipalPort, vendaMapper);
+        useCase = new EfetuarVendaUseCase(veiculoRepositoryPort, vendaRepositoryPort, sistemaPrincipalPort);
 
         Veiculo jaVendido = Veiculo.restaurar(1L, "Toyota", "Corolla", 2022, "Prata",
                 Preco.de(BigDecimal.valueOf(95000)), StatusVeiculo.VENDIDO);
@@ -97,7 +94,7 @@ class EfetuarVendaUseCaseTest {
 
     @Test
     void deveLancarExcecaoQuandoCpfInvalido() {
-        useCase = new EfetuarVendaUseCase(veiculoRepositoryPort, vendaRepositoryPort, sistemaPrincipalPort, vendaMapper);
+        useCase = new EfetuarVendaUseCase(veiculoRepositoryPort, vendaRepositoryPort, sistemaPrincipalPort);
 
         // CPF e validado antes de tocar no veiculo, entao nem buscarPorId chega a ser chamado.
         assertThatThrownBy(() -> useCase.efetuar(new EfetuarVendaRequest(1L, "111.111.111-11")))

@@ -1,8 +1,6 @@
 package com.revendaveiculos.servicovendas.application.venda.usecase;
 
 import com.revendaveiculos.servicovendas.application.venda.dto.request.WebhookPagamentoRequest;
-import com.revendaveiculos.servicovendas.application.venda.dto.response.VendaResponse;
-import com.revendaveiculos.servicovendas.application.venda.mapper.VendaMapper;
 import com.revendaveiculos.servicovendas.application.venda.port.in.ProcessarWebhookPagamentoInputPort;
 import com.revendaveiculos.servicovendas.application.venda.port.out.SistemaPrincipalPort;
 import com.revendaveiculos.servicovendas.application.venda.port.out.VendaRepositoryPort;
@@ -24,20 +22,17 @@ public class ProcessarWebhookPagamentoUseCase implements ProcessarWebhookPagamen
     private final VendaRepositoryPort vendaRepositoryPort;
     private final VeiculoRepositoryPort veiculoRepositoryPort;
     private final SistemaPrincipalPort sistemaPrincipalPort;
-    private final VendaMapper vendaMapper;
 
     public ProcessarWebhookPagamentoUseCase(VendaRepositoryPort vendaRepositoryPort,
                                              VeiculoRepositoryPort veiculoRepositoryPort,
-                                             SistemaPrincipalPort sistemaPrincipalPort,
-                                             VendaMapper vendaMapper) {
+                                             SistemaPrincipalPort sistemaPrincipalPort) {
         this.vendaRepositoryPort = vendaRepositoryPort;
         this.veiculoRepositoryPort = veiculoRepositoryPort;
         this.sistemaPrincipalPort = sistemaPrincipalPort;
-        this.vendaMapper = vendaMapper;
     }
 
     @Override
-    public VendaResponse processar(WebhookPagamentoRequest request) {
+    public Venda processar(WebhookPagamentoRequest request) {
         Venda venda = vendaRepositoryPort.buscarPorCodigoPagamento(request.codigoPagamento())
                 .orElseThrow(() -> new VendaNaoEncontradaException(request.codigoPagamento()));
 
@@ -60,6 +55,6 @@ public class ProcessarWebhookPagamentoUseCase implements ProcessarWebhookPagamen
 
         sistemaPrincipalPort.notificarResultadoVenda(vendaAtualizada);
 
-        return vendaMapper.paraResponse(vendaAtualizada);
+        return vendaAtualizada;
     }
 }

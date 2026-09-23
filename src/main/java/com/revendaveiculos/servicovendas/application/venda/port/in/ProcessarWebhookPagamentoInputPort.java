@@ -1,9 +1,9 @@
 package com.revendaveiculos.servicovendas.application.venda.port.in;
 
 import com.revendaveiculos.servicovendas.application.venda.dto.request.WebhookPagamentoRequest;
-import com.revendaveiculos.servicovendas.application.venda.dto.response.VendaResponse;
+import com.revendaveiculos.servicovendas.domain.model.venda.Venda;
 
 public interface ProcessarWebhookPagamentoInputPort {
 
-    VendaResponse processar(WebhookPagamentoRequest request);
+    Venda processar(WebhookPagamentoRequest request);
 }

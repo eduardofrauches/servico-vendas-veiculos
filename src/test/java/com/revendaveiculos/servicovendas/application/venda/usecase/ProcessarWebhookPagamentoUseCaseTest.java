@@ -1,8 +1,6 @@
 package com.revendaveiculos.servicovendas.application.venda.usecase;
 
 import com.revendaveiculos.servicovendas.application.venda.dto.request.WebhookPagamentoRequest;
-import com.revendaveiculos.servicovendas.application.venda.dto.response.VendaResponse;
-import com.revendaveiculos.servicovendas.application.venda.mapper.VendaMapper;
 import com.revendaveiculos.servicovendas.application.venda.port.out.SistemaPrincipalPort;
 import com.revendaveiculos.servicovendas.application.venda.port.out.VendaRepositoryPort;
 import com.revendaveiculos.servicovendas.application.veiculo.port.out.VeiculoRepositoryPort;
@@ -45,8 +43,6 @@ class ProcessarWebhookPagamentoUseCaseTest {
     @Mock
     private SistemaPrincipalPort sistemaPrincipalPort;
 
-    private final VendaMapper vendaMapper = new VendaMapper();
-
     private ProcessarWebhookPagamentoUseCase useCase;
 
     private Venda vendaPendente() {
@@ -61,15 +57,15 @@ class ProcessarWebhookPagamentoUseCaseTest {
 
     @Test
     void deveAprovarPagamentoEMarcarVeiculoComoVendido() {
-        useCase = new ProcessarWebhookPagamentoUseCase(vendaRepositoryPort, veiculoRepositoryPort, sistemaPrincipalPort, vendaMapper);
+        useCase = new ProcessarWebhookPagamentoUseCase(vendaRepositoryPort, veiculoRepositoryPort, sistemaPrincipalPort);
 
         when(vendaRepositoryPort.buscarPorCodigoPagamento(CODIGO_PAGAMENTO)).thenReturn(Optional.of(vendaPendente()));
         when(veiculoRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(veiculoReservado()));
         when(vendaRepositoryPort.salvar(any(Venda.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        VendaResponse response = useCase.processar(new WebhookPagamentoRequest(CODIGO_PAGAMENTO, ResultadoPagamento.APROVADO));
+        Venda response = useCase.processar(new WebhookPagamentoRequest(CODIGO_PAGAMENTO, ResultadoPagamento.APROVADO));
 
-        assertThat(response.status()).isEqualTo("PAGAMENTO_APROVADO");
+        assertThat(response.getStatus()).isEqualTo(StatusVenda.PAGAMENTO_APROVADO);
 
         ArgumentCaptor<Veiculo> veiculoCaptor = ArgumentCaptor.forClass(Veiculo.class);
         verify(veiculoRepositoryPort).salvar(veiculoCaptor.capture());
@@ -80,15 +76,15 @@ class ProcessarWebhookPagamentoUseCaseTest {
 
     @Test
     void deveCancelarPagamentoEDevolverVeiculoParaDisponivel() {
-        useCase = new ProcessarWebhookPagamentoUseCase(vendaRepositoryPort, veiculoRepositoryPort, sistemaPrincipalPort, vendaMapper);
+        useCase = new ProcessarWebhookPagamentoUseCase(vendaRepositoryPort, veiculoRepositoryPort, sistemaPrincipalPort);
 
         when(vendaRepositoryPort.buscarPorCodigoPagamento(CODIGO_PAGAMENTO)).thenReturn(Optional.of(vendaPendente()));
         when(veiculoRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(veiculoReservado()));
         when(vendaRepositoryPort.salvar(any(Venda.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        VendaResponse response = useCase.processar(new WebhookPagamentoRequest(CODIGO_PAGAMENTO, ResultadoPagamento.CANCELADO));
+        Venda response = useCase.processar(new WebhookPagamentoRequest(CODIGO_PAGAMENTO, ResultadoPagamento.CANCELADO));
 
-        assertThat(response.status()).isEqualTo("PAGAMENTO_CANCELADO");
+        assertThat(response.getStatus()).isEqualTo(StatusVenda.PAGAMENTO_CANCELADO);
 
         ArgumentCaptor<Veiculo> veiculoCaptor = ArgumentCaptor.forClass(Veiculo.class);
         verify(veiculoRepositoryPort).salvar(veiculoCaptor.capture());
@@ -97,7 +93,7 @@ class ProcessarWebhookPagamentoUseCaseTest {
 
     @Test
     void deveLancarExcecaoQuandoVendaNaoEncontrada() {
-        useCase = new ProcessarWebhookPagamentoUseCase(vendaRepositoryPort, veiculoRepositoryPort, sistemaPrincipalPort, vendaMapper);
+        useCase = new ProcessarWebhookPagamentoUseCase(vendaRepositoryPort, veiculoRepositoryPort, sistemaPrincipalPort);
 
         when(vendaRepositoryPort.buscarPorCodigoPagamento("inexistente")).thenReturn(Optional.empty());
 
@@ -109,7 +105,7 @@ class ProcessarWebhookPagamentoUseCaseTest {
 
     @Test
     void deveLancarExcecaoQuandoVeiculoDaVendaNaoEncontrado() {
-        useCase = new ProcessarWebhookPagamentoUseCase(vendaRepositoryPort, veiculoRepositoryPort, sistemaPrincipalPort, vendaMapper);
+        useCase = new ProcessarWebhookPagamentoUseCase(vendaRepositoryPort, veiculoRepositoryPort, sistemaPrincipalPort);
 
         when(vendaRepositoryPort.buscarPorCodigoPagamento(CODIGO_PAGAMENTO)).thenReturn(Optional.of(vendaPendente()));
         when(veiculoRepositoryPort.buscarPorId(1L)).thenReturn(Optional.empty());
@@ -123,7 +119,7 @@ class ProcessarWebhookPagamentoUseCaseTest {
 
     @Test
     void deveLancarExcecaoQuandoVendaJaFoiProcessada() {
-        useCase = new ProcessarWebhookPagamentoUseCase(vendaRepositoryPort, veiculoRepositoryPort, sistemaPrincipalPort, vendaMapper);
+        useCase = new ProcessarWebhookPagamentoUseCase(vendaRepositoryPort, veiculoRepositoryPort, sistemaPrincipalPort);
 
         Venda vendaJaAprovada = Venda.restaurar(10L, 1L, Cpf.de("529.982.247-25"), LocalDateTime.now(),
                 Preco.de(BigDecimal.valueOf(95000)), StatusVenda.PAGAMENTO_APROVADO, CODIGO_PAGAMENTO);

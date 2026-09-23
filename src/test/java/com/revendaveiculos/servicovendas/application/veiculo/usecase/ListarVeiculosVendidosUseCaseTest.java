@@ -1,7 +1,5 @@
 package com.revendaveiculos.servicovendas.application.veiculo.usecase;
 
-import com.revendaveiculos.servicovendas.application.veiculo.dto.response.VeiculoResponse;
-import com.revendaveiculos.servicovendas.application.veiculo.mapper.VeiculoMapper;
 import com.revendaveiculos.servicovendas.application.veiculo.port.out.VeiculoRepositoryPort;
 import com.revendaveiculos.servicovendas.domain.model.veiculo.StatusVeiculo;
 import com.revendaveiculos.servicovendas.domain.model.veiculo.Veiculo;
@@ -23,27 +21,23 @@ class ListarVeiculosVendidosUseCaseTest {
     @Mock
     private VeiculoRepositoryPort veiculoRepositoryPort;
 
-    private final VeiculoMapper veiculoMapper = new VeiculoMapper();
-
     @Test
     void deveListarVeiculosVendidos() {
-        ListarVeiculosVendidosUseCase useCase =
-                new ListarVeiculosVendidosUseCase(veiculoRepositoryPort, veiculoMapper);
+        ListarVeiculosVendidosUseCase useCase = new ListarVeiculosVendidosUseCase(veiculoRepositoryPort);
 
         Veiculo veiculo = Veiculo.restaurar(2L, "Honda", "Civic", 2023, "Preto",
                 Preco.de(BigDecimal.valueOf(110000)), StatusVeiculo.VENDIDO);
         when(veiculoRepositoryPort.listarVendidos()).thenReturn(List.of(veiculo));
 
-        List<VeiculoResponse> resultado = useCase.listar();
+        List<Veiculo> resultado = useCase.listar();
 
         assertThat(resultado).hasSize(1);
-        assertThat(resultado.get(0).status()).isEqualTo("VENDIDO");
+        assertThat(resultado.get(0).getStatus()).isEqualTo(StatusVeiculo.VENDIDO);
     }
 
     @Test
     void deveOrdenarVeiculosVendidosPorPrecoCrescente() {
-        ListarVeiculosVendidosUseCase useCase =
-                new ListarVeiculosVendidosUseCase(veiculoRepositoryPort, veiculoMapper);
+        ListarVeiculosVendidosUseCase useCase = new ListarVeiculosVendidosUseCase(veiculoRepositoryPort);
 
         // Propositalmente fora de ordem e com o mais barato no meio da lista,
         // para garantir que o UseCase ordena e nao so preserva a ordem de entrada.
@@ -55,9 +49,9 @@ class ListarVeiculosVendidosUseCaseTest {
                 Preco.de(BigDecimal.valueOf(110000)), StatusVeiculo.VENDIDO);
         when(veiculoRepositoryPort.listarVendidos()).thenReturn(List.of(caro, barato, medio));
 
-        List<VeiculoResponse> resultado = useCase.listar();
+        List<Veiculo> resultado = useCase.listar();
 
-        assertThat(resultado).extracting(VeiculoResponse::id).containsExactly(2L, 3L, 1L);
-        assertThat(resultado).extracting(VeiculoResponse::preco).isSortedAccordingTo(BigDecimal::compareTo);
+        assertThat(resultado).extracting(Veiculo::getId).containsExactly(2L, 3L, 1L);
+        assertThat(resultado).extracting(veiculo -> veiculo.getPreco().valor()).isSortedAccordingTo(BigDecimal::compareTo);
     }
 }

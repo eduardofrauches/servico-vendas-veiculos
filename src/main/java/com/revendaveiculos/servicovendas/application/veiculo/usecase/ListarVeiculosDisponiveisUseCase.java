@@ -1,9 +1,8 @@
 package com.revendaveiculos.servicovendas.application.veiculo.usecase;
 
-import com.revendaveiculos.servicovendas.application.veiculo.dto.response.VeiculoResponse;
-import com.revendaveiculos.servicovendas.application.veiculo.mapper.VeiculoMapper;
 import com.revendaveiculos.servicovendas.application.veiculo.port.in.ListarVeiculosDisponiveisInputPort;
 import com.revendaveiculos.servicovendas.application.veiculo.port.out.VeiculoRepositoryPort;
+import com.revendaveiculos.servicovendas.domain.model.veiculo.Veiculo;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -13,18 +12,15 @@ import java.util.List;
 public class ListarVeiculosDisponiveisUseCase implements ListarVeiculosDisponiveisInputPort {
 
     private final VeiculoRepositoryPort veiculoRepositoryPort;
-    private final VeiculoMapper veiculoMapper;
 
-    public ListarVeiculosDisponiveisUseCase(VeiculoRepositoryPort veiculoRepositoryPort, VeiculoMapper veiculoMapper) {
+    public ListarVeiculosDisponiveisUseCase(VeiculoRepositoryPort veiculoRepositoryPort) {
         this.veiculoRepositoryPort = veiculoRepositoryPort;
-        this.veiculoMapper = veiculoMapper;
     }
 
     @Override
-    public List<VeiculoResponse> listar() {
+    public List<Veiculo> listar() {
         return veiculoRepositoryPort.listarDisponiveis().stream()
                 .sorted(Comparator.comparing(veiculo -> veiculo.getPreco().valor()))
-                .map(veiculoMapper::paraResponse)
                 .toList();
     }
 }

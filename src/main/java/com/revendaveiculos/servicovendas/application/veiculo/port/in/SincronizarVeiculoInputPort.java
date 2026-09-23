@@ -1,9 +1,9 @@
 package com.revendaveiculos.servicovendas.application.veiculo.port.in;
 
 import com.revendaveiculos.servicovendas.application.veiculo.dto.request.SincronizarVeiculoRequest;
-import com.revendaveiculos.servicovendas.application.veiculo.dto.response.VeiculoResponse;
+import com.revendaveiculos.servicovendas.domain.model.veiculo.Veiculo;
 
 public interface SincronizarVeiculoInputPort {
 
-    VeiculoResponse sincronizar(SincronizarVeiculoRequest request);
+    Veiculo sincronizar(SincronizarVeiculoRequest request);
 }

@@ -1,8 +1,10 @@
 package com.revendaveiculos.servicovendas.adapter.in.controller.venda;
 
+import com.revendaveiculos.servicovendas.adapter.in.presenter.venda.VendaPresenter;
 import com.revendaveiculos.servicovendas.application.venda.dto.request.EfetuarVendaRequest;
 import com.revendaveiculos.servicovendas.application.venda.dto.response.VendaResponse;
 import com.revendaveiculos.servicovendas.application.venda.port.in.EfetuarVendaInputPort;
+import com.revendaveiculos.servicovendas.domain.model.venda.Venda;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,13 +18,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class VendaController {
 
     private final EfetuarVendaInputPort efetuarVendaInputPort;
+    private final VendaPresenter vendaPresenter;
 
-    public VendaController(EfetuarVendaInputPort efetuarVendaInputPort) {
+    public VendaController(EfetuarVendaInputPort efetuarVendaInputPort, VendaPresenter vendaPresenter) {
         this.efetuarVendaInputPort = efetuarVendaInputPort;
+        this.vendaPresenter = vendaPresenter;
     }
 
     @PostMapping
     public ResponseEntity<VendaResponse> efetuar(@Valid @RequestBody EfetuarVendaRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(efetuarVendaInputPort.efetuar(request));
+        Venda venda = efetuarVendaInputPort.efetuar(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(vendaPresenter.apresentar(venda));
     }
 }

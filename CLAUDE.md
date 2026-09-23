@@ -35,6 +35,9 @@ src/main/java/com/revendaveiculos/servicovendas/
 │   │   │   └── venda/
 │   │   │       ├── VendaController                    <- POST /vendas
 │   │   │       └── PagamentoWebhookController          <- POST /webhooks/pagamento
+│   │   ├── presenter/
+│   │   │   ├── veiculo/VeiculoPresenter                <- formata Entity Veiculo (ou List<Veiculo>) em VeiculoResponse
+│   │   │   └── venda/VendaPresenter                     <- formata Entity Venda em VendaResponse
 │   │   └── exception/GlobalExceptionHandler            <- @RestControllerAdvice, traduz exceptions -> HTTP
 │   └── out/
 │       ├── veiculo/persistence/jpa/{entity,mapper,repository}/   <- VeiculoEntity (id NAO gerado aqui, vem do sistema-principal), VeiculoEntityMapper, VeiculoJpaRepository + VeiculoRepositoryAdapter
@@ -66,6 +69,28 @@ src/main/java/com/revendaveiculos/servicovendas/
    `CLAUDE.md` do repo irmao para o racional completo — aqui vale a
    mesma regra: controllers dependem so de `port/in`; UseCases
    implementam `port/in` e dependem de `port/out`.
+1a. **Presenter dedicado por dominio** (`adapter/in/presenter/veiculo/VeiculoPresenter`,
+   `adapter/in/presenter/venda/VendaPresenter`), adicionado apos
+   auditoria de Clean Architecture que apontou a ausencia dessa camada
+   como lacuna de um feedback de trabalho anterior do curso — mesma
+   motivacao e mesmo local (`adapter/in/presenter/`, ao lado de
+   `adapter/in/controller/`) do sistema-principal-veiculos (ver
+   decisao 1a de la para o racional completo). Os `port/in`
+   (`SincronizarVeiculoInputPort`, `ListarVeiculosDisponiveisInputPort`,
+   `ListarVeiculosVendidosInputPort`, `EfetuarVendaInputPort`,
+   `ProcessarWebhookPagamentoInputPort`) agora devolvem a Entity de
+   dominio (`Veiculo`/`Venda`, ou `List<Veiculo>`), nao mais o DTO de
+   resposta; os Controllers chamam o Presenter correspondente antes de
+   montar o `ResponseEntity`. `VeiculoMapper` manteve so `paraDominio`
+   (usado por `SincronizarVeiculoUseCase`); `VendaMapper` foi **removido**
+   por completo — so tinha o metodo `paraResponse`, que foi movido para
+   `VendaPresenter`, entao a classe ficou sem nenhuma responsabilidade
+   (nem `EfetuarVendaUseCase` nem `ProcessarWebhookPagamentoUseCase`
+   nunca precisaram converter DTO -> dominio; a Entity `Venda` sempre
+   foi construida via `Venda.efetuar(...)`). Mudanca estrutural, sem
+   alterar nenhuma regra de negocio — suite inteira (unitarios +
+   integracao + BDD) permanece verde e a cobertura continua acima de
+   80% depois da migracao (ver secao Testes).
 2. **`EfetuarVendaUseCase` depende de `VeiculoRepositoryPort`
    (do dominio `veiculo`), `VendaRepositoryPort` e `SistemaPrincipalPort`
    (do dominio `venda`)** — uma excecao consciente ao isolamento por
@@ -194,9 +219,11 @@ comandos `curl` exatos e as respostas recebidas.
   `domain/exception/**`, `adapter/in/exception/**` (boilerplate sem
   logica de negocio) — mesmo espirito das `sonar.coverage.exclusions`
   do `oficina-service-mvp` de referencia.
-- **Ultima medicao:** 22 testes (10 unitarios + 8 integracao + 2 cenarios
-  BDD/8 steps), 0 falhas, **~86% de cobertura de linha** — acima do
-  minimo de 80% exigido pelo enunciado, confirmado com `mvnw verify`
+- **Ultima medicao:** 27 testes (14 unitarios, incluindo
+  `VeiculoPresenterTest` e `VendaPresenterTest` adicionados junto com
+  os Presenters — ver decisao 1a — + 8 integracao + 2 cenarios BDD/8
+  steps), 0 falhas, **~86% de cobertura de linha** — acima do minimo de
+  80% exigido pelo enunciado, confirmado com `mvnw verify`
   (`jacoco:check` -> "All coverage checks have been met"). Unico ponto
   sem cobertura relevante: `SistemaPrincipalHttpAdapter` (0%), porque e
   justamente o bean mockado no BDD — se isso incomodar no futuro, dá

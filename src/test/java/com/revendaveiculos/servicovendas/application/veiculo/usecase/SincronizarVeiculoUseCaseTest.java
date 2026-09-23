@@ -1,7 +1,6 @@
 package com.revendaveiculos.servicovendas.application.veiculo.usecase;
 
 import com.revendaveiculos.servicovendas.application.veiculo.dto.request.SincronizarVeiculoRequest;
-import com.revendaveiculos.servicovendas.application.veiculo.dto.response.VeiculoResponse;
 import com.revendaveiculos.servicovendas.application.veiculo.mapper.VeiculoMapper;
 import com.revendaveiculos.servicovendas.application.veiculo.port.out.VeiculoRepositoryPort;
 import com.revendaveiculos.servicovendas.domain.exception.PrecoInvalidoException;
@@ -40,10 +39,10 @@ class SincronizarVeiculoUseCaseTest {
                 StatusVeiculo.DISPONIVEL);
         when(veiculoRepositoryPort.salvar(any(Veiculo.class))).thenReturn(salvo);
 
-        VeiculoResponse response = useCase.sincronizar(request);
+        Veiculo response = useCase.sincronizar(request);
 
-        assertThat(response.id()).isEqualTo(1L);
-        assertThat(response.status()).isEqualTo("DISPONIVEL");
+        assertThat(response.getId()).isEqualTo(1L);
+        assertThat(response.getStatus()).isEqualTo(StatusVeiculo.DISPONIVEL);
     }
 
     @Test

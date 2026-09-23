@@ -1,7 +1,5 @@
 package com.revendaveiculos.servicovendas.application.veiculo.usecase;
 
-import com.revendaveiculos.servicovendas.application.veiculo.dto.response.VeiculoResponse;
-import com.revendaveiculos.servicovendas.application.veiculo.mapper.VeiculoMapper;
 import com.revendaveiculos.servicovendas.application.veiculo.port.out.VeiculoRepositoryPort;
 import com.revendaveiculos.servicovendas.domain.model.veiculo.StatusVeiculo;
 import com.revendaveiculos.servicovendas.domain.model.veiculo.Veiculo;
@@ -23,28 +21,24 @@ class ListarVeiculosDisponiveisUseCaseTest {
     @Mock
     private VeiculoRepositoryPort veiculoRepositoryPort;
 
-    private final VeiculoMapper veiculoMapper = new VeiculoMapper();
-
     @Test
     void deveListarVeiculosDisponiveis() {
-        ListarVeiculosDisponiveisUseCase useCase =
-                new ListarVeiculosDisponiveisUseCase(veiculoRepositoryPort, veiculoMapper);
+        ListarVeiculosDisponiveisUseCase useCase = new ListarVeiculosDisponiveisUseCase(veiculoRepositoryPort);
 
         Veiculo veiculo = Veiculo.restaurar(1L, "Toyota", "Corolla", 2022, "Prata",
                 Preco.de(BigDecimal.valueOf(95000)), StatusVeiculo.DISPONIVEL);
         when(veiculoRepositoryPort.listarDisponiveis()).thenReturn(List.of(veiculo));
 
-        List<VeiculoResponse> resultado = useCase.listar();
+        List<Veiculo> resultado = useCase.listar();
 
         assertThat(resultado).hasSize(1);
-        assertThat(resultado.get(0).id()).isEqualTo(1L);
-        assertThat(resultado.get(0).status()).isEqualTo("DISPONIVEL");
+        assertThat(resultado.get(0).getId()).isEqualTo(1L);
+        assertThat(resultado.get(0).getStatus()).isEqualTo(StatusVeiculo.DISPONIVEL);
     }
 
     @Test
     void deveRetornarListaVaziaQuandoNaoHaVeiculosDisponiveis() {
-        ListarVeiculosDisponiveisUseCase useCase =
-                new ListarVeiculosDisponiveisUseCase(veiculoRepositoryPort, veiculoMapper);
+        ListarVeiculosDisponiveisUseCase useCase = new ListarVeiculosDisponiveisUseCase(veiculoRepositoryPort);
 
         when(veiculoRepositoryPort.listarDisponiveis()).thenReturn(List.of());
 
@@ -53,8 +47,7 @@ class ListarVeiculosDisponiveisUseCaseTest {
 
     @Test
     void deveOrdenarVeiculosDisponiveisPorPrecoCrescente() {
-        ListarVeiculosDisponiveisUseCase useCase =
-                new ListarVeiculosDisponiveisUseCase(veiculoRepositoryPort, veiculoMapper);
+        ListarVeiculosDisponiveisUseCase useCase = new ListarVeiculosDisponiveisUseCase(veiculoRepositoryPort);
 
         // Propositalmente fora de ordem e com o mais barato no meio da lista,
         // para garantir que o UseCase ordena e nao so preserva a ordem de entrada.
@@ -66,9 +59,9 @@ class ListarVeiculosDisponiveisUseCaseTest {
                 Preco.de(BigDecimal.valueOf(95000)), StatusVeiculo.DISPONIVEL);
         when(veiculoRepositoryPort.listarDisponiveis()).thenReturn(List.of(caro, barato, medio));
 
-        List<VeiculoResponse> resultado = useCase.listar();
+        List<Veiculo> resultado = useCase.listar();
 
-        assertThat(resultado).extracting(VeiculoResponse::id).containsExactly(2L, 3L, 1L);
-        assertThat(resultado).extracting(VeiculoResponse::preco).isSortedAccordingTo(BigDecimal::compareTo);
+        assertThat(resultado).extracting(Veiculo::getId).containsExactly(2L, 3L, 1L);
+        assertThat(resultado).extracting(veiculo -> veiculo.getPreco().valor()).isSortedAccordingTo(BigDecimal::compareTo);
     }
 }
