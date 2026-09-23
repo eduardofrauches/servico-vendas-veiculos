@@ -26,7 +26,9 @@ e o dono do cadastro/edicao de veiculos (dados-mestre).
 - Spring Boot 3.5.x (Web, Data JPA, Validation)
 - PostgreSQL
 - Lombok
-- Arquitetura em camadas inspirada em Clean Architecture (ver [CLAUDE.md](CLAUDE.md))
+- Arquitetura em camadas inspirada em Clean Architecture, com Presenter
+  dedicado por dominio (`adapter/in/presenter`) separando a formatacao
+  da resposta HTTP do UseCase (ver [CLAUDE.md](CLAUDE.md))
 
 ## Endpoints
 
@@ -115,6 +117,12 @@ JaCoCo em `target/site/jacoco/index.html` apos `./mvnw test`.
 
 - **Unitarios** (`application/**/usecase/*Test.java`): cada UseCase
   testado com Mockito, mockando os `port/out` — sem Spring, sem banco.
+  Os UseCases devolvem a Entity de dominio (`Veiculo`/`Venda`, ou
+  `List<Veiculo>`), nao mais o DTO de resposta, entao as asserções
+  verificam a Entity retornada.
+- **Presenter** (`adapter/in/presenter/**/*PresenterTest.java`):
+  `VeiculoPresenterTest` e `VendaPresenterTest` cobrem a conversao para
+  `VeiculoResponse`/`VendaResponse`, isolada do UseCase.
 - **Integracao** (`adapter/out/**/*IT.java`): `VeiculoRepositoryAdapterIT`
   e `VendaRepositoryAdapterIT`, `@DataJpaTest` contra Postgres real
   (Testcontainers, nao H2).
@@ -126,7 +134,7 @@ JaCoCo em `target/site/jacoco/index.html` apos `./mvnw test`.
   nesse teste, ja que a comunicacao com o outro servico nao e o alvo do
   cenario.
 
-**Ultima medicao:** 22 testes, 0 falhas, cobertura de linha ~86%
+**Ultima medicao:** 27 testes, 0 falhas, cobertura de linha ~86%
 (acima do minimo de 80% exigido pelo enunciado). Ver o resumo de
 entrega na raiz do repositorio para o detalhamento.
 
