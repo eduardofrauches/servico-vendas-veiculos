@@ -19,7 +19,7 @@ sincronizada via HTTP — nunca acessa o banco do sistema-principal.
 
 ```bash
 ./mvnw clean compile      # compilar
-docker compose up -d      # na raiz do repo: sobe o Postgres deste servico e o do outro
+docker compose up -d      # no repo irmao infra-databases-revenda-veiculos: sobe o Postgres deste servico e o do outro
 ./mvnw spring-boot:run    # rodar (porta 8082) — precisa do Postgres acima no ar
 ./mvnw test                # quando houver testes
 ```
@@ -168,9 +168,8 @@ src/main/java/com/revendaveiculos/servicovendas/
     host — fisicamente separado do banco do sistema-principal, que usa
     5432) e define a porta HTTP do servico (`8082`) e a URL base do
     `sistema-principal-veiculos`. O `docker-compose.yml` que sobe esse
-    banco fica na **raiz do repositorio**
-    (`C:\Dev\revenda-veiculos\docker-compose.yml`), nao dentro deste
-    projeto.
+    banco fica no repositorio irmao **`infra-databases-revenda-veiculos`**
+    (clonado como pasta irma deste), nao dentro deste projeto.
 
 ## Testado manualmente (fluxo ponta a ponta)
 

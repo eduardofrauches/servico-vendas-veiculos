@@ -61,11 +61,22 @@ vender veiculo que nao esta `DISPONIVEL`).
 
 ## Como rodar
 
-1. Suba a infraestrutura de banco (na raiz do repo, `C:\Dev\revenda-veiculos`):
+1. Suba os bancos. O `docker-compose.yml` fica no repositorio
+   [infra-databases-revenda-veiculos](https://github.com/eduardofrauches/infra-databases-revenda-veiculos):
+   clone-o como **pasta irma** (mesmo nivel) deste repositorio, entre nela
+   e rode o compose (requer Docker rodando):
    ```bash
+   # a partir da pasta pai onde este repositorio foi clonado
+   git clone https://github.com/eduardofrauches/infra-databases-revenda-veiculos.git
+   cd infra-databases-revenda-veiculos
    docker compose up -d
+   cd ../servico-vendas-veiculos
    ```
-2. Rode a aplicacao:
+   Isso sobe os dois Postgres (`5433` para este servico, `5432` para o
+   `sistema-principal-veiculos`), com as credenciais que o `application.yml` ja espera.
+2. Rode a aplicacao (requer JDK 17+; o Maven Wrapper baixa o Maven sozinho). Para o
+   fluxo completo, suba tambem o [sistema-principal-veiculos](https://github.com/eduardofrauches/sistema-principal-veiculos)
+   (porta `8081`):
    ```bash
    ./mvnw spring-boot:run
    ```

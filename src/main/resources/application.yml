@@ -7,7 +7,7 @@ spring:
 
   datasource:
     # Banco fisicamente separado do sistema-principal: container Postgres
-    # proprio, exposto na porta 5433 do host (ver docker-compose.yml na raiz).
+    # proprio, exposto na porta 5433 do host (ver docker-compose.yml no repo infra-databases-revenda-veiculos).
     url: jdbc:postgresql://localhost:5433/veiculos_vendas_db
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
