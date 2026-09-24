@@ -1,9 +1,7 @@
-# CLAUDE.md — servico-vendas-veiculos
+# Decisões de Arquitetura — servico-vendas-veiculos
 
-Contexto para o Claude Code manter coerencia entre sessoes futuras
-neste repositorio. Ver tambem o documento de arquitetura original em
-`arquitetura-revenda-veiculos.md` (na maquina do usuario, fora deste
-repo) para a visao completa dos dois servicos.
+Registro das decisões arquiteturais deste serviço, mantido ao longo
+do desenvolvimento para referência futura.
 
 ## O que este servico e
 
@@ -66,7 +64,7 @@ src/main/java/com/revendaveiculos/servicovendas/
 
 1. **Mesmo padrao de Clean Architecture do sistema-principal-veiculos**
    (porta de entrada/saida explicitas, por dominio de negocio). Ver
-   `CLAUDE.md` do repo irmao para o racional completo — aqui vale a
+   `ARCHITECTURE.md` do repo irmao para o racional completo — aqui vale a
    mesma regra: controllers dependem so de `port/in`; UseCases
    implementam `port/in` e dependem de `port/out`.
 1a. **Presenter dedicado por dominio** (`adapter/in/presenter/veiculo/VeiculoPresenter`,

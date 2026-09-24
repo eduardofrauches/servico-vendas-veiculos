@@ -28,7 +28,7 @@ e o dono do cadastro/edicao de veiculos (dados-mestre).
 - Lombok
 - Arquitetura em camadas inspirada em Clean Architecture, com Presenter
   dedicado por dominio (`adapter/in/presenter`) separando a formatacao
-  da resposta HTTP do UseCase (ver [CLAUDE.md](CLAUDE.md))
+  da resposta HTTP do UseCase (ver [ARCHITECTURE.md](ARCHITECTURE.md))
 
 ## Endpoints
 
@@ -111,7 +111,7 @@ kubectl apply -k k8s/overlays/local
 ## Testado manualmente
 
 Fluxo ponta a ponta validado com `curl` junto com o
-`sistema-principal-veiculos`. Ver [CLAUDE.md](CLAUDE.md) para os
+`sistema-principal-veiculos`. Ver [ARCHITECTURE.md](ARCHITECTURE.md) para os
 detalhes arquiteturais e o resumo de entrega do repositorio para os
 comandos usados e as respostas recebidas.
 
