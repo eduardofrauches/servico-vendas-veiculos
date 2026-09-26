@@ -244,4 +244,5 @@ etapas:
 - [ ] Overlay Kubernetes para nuvem (`k8s/overlays/aws` ou equivalente) — hoje so existe `overlays/local`.
 - [ ] Gerenciamento de segredos de verdade (Sealed Secrets, Vault, External Secrets) no lugar do `Secret` placeholder.
 - [ ] Resiliencia mais robusta nas chamadas HTTP (retry/circuit breaker) — hoje uma falha so gera um log de warning.
+- [x] Tratamento de erros HTTP validado manualmente (JSON malformado, metodo nao suportado, CPF invalido, recurso nao encontrado, conflito de estado) — ver secao "Testando manualmente" acima.
 - [ ] Testes de contrato/erro para os controllers e o `GlobalExceptionHandler` (hoje cobertos so indiretamente pelo BDD).
