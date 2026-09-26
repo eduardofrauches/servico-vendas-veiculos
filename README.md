@@ -59,32 +59,37 @@ vender veiculo que nao esta `DISPONIVEL`).
 4. O resultado final e notificado ao `sistema-principal-veiculos` do
    mesmo jeito (`SistemaPrincipalPort` / `PATCH /veiculos/{id}/status`).
 
-## Como rodar
+## Instruções de Execução
 
-1. Suba os bancos. O `docker-compose.yml` fica no repositorio
-   [infra-databases-revenda-veiculos](https://github.com/eduardofrauches/infra-databases-revenda-veiculos):
-   clone-o como **pasta irma** (mesmo nivel) deste repositorio, entre nela
-   e rode o compose (requer Docker rodando):
-   ```bash
-   # a partir da pasta pai onde este repositorio foi clonado
-   git clone https://github.com/eduardofrauches/infra-databases-revenda-veiculos.git
-   cd infra-databases-revenda-veiculos
-   docker compose up -d
-   cd ../servico-vendas-veiculos
-   ```
-   Isso sobe os dois Postgres (`5433` para este servico, `5432` para o
-   `sistema-principal-veiculos`), com as credenciais que o `application.yml` ja espera.
-2. Rode a aplicacao (requer JDK 17+; o Maven Wrapper baixa o Maven sozinho). Para o
-   fluxo completo, suba tambem o [sistema-principal-veiculos](https://github.com/eduardofrauches/sistema-principal-veiculos)
-   (porta `8081`):
-   ```bash
-   ./mvnw spring-boot:run
-   ```
+### Pré-requisitos
+- JDK 17 ou superior (o Maven Wrapper baixa o Maven sozinho)
+- Docker rodando
+- Infraestrutura de banco já no ar (ver repositório
+  [infra-databases-revenda-veiculos](https://github.com/eduardofrauches/infra-databases-revenda-veiculos), passo anterior)
 
-A aplicacao sobe na porta `8082` e conecta no PostgreSQL do container
-`revenda-postgres-vendas` (`localhost:5433/veiculos_vendas_db`, ver
-`application.yml`). O schema e criado automaticamente
-(`ddl-auto: update`) — ainda nao ha migrations (Flyway/Liquibase).
+### 1. Clonar o repositório
+```bash
+git clone https://github.com/eduardofrauches/servico-vendas-veiculos.git
+cd servico-vendas-veiculos
+```
+
+### 2. Subir os bancos (se ainda não tiver feito)
+Clone [infra-databases-revenda-veiculos](https://github.com/eduardofrauches/infra-databases-revenda-veiculos) como pasta irmã
+(mesmo nível) deste repositório e siga o README de lá.
+
+### 3. Rodar a aplicação
+```bash
+./mvnw spring-boot:run
+```
+
+Para o fluxo completo, suba também o
+[sistema-principal-veiculos](https://github.com/eduardofrauches/sistema-principal-veiculos)
+(porta `8081`).
+
+A aplicação sobe na porta `8082` e conecta no PostgreSQL do
+container `revenda-postgres-vendas`
+(`localhost:5433/veiculos_vendas_db`, ver `application.yml`). O schema
+é criado automaticamente (`ddl-auto: update`).
 
 ## Kubernetes
 
