@@ -8,6 +8,8 @@ import com.revendaveiculos.servicovendas.domain.exception.VeiculoNaoEncontradoEx
 import com.revendaveiculos.servicovendas.domain.exception.VendaNaoEncontradaException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -47,6 +49,20 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> tratarConflitoDeEstado(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ErrorResponse.de(HttpStatus.CONFLICT.value(), "Conflito de estado", ex.getMessage()));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> tratarJsonInvalido(HttpMessageNotReadableException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponse.de(HttpStatus.BAD_REQUEST.value(), "Requisicao invalida",
+                        "O corpo da requisicao esta ausente ou nao e um JSON valido"));
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> tratarMetodoNaoSuportado(HttpRequestMethodNotSupportedException ex) {
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body(ErrorResponse.de(HttpStatus.METHOD_NOT_ALLOWED.value(), "Metodo nao suportado",
+                        "O metodo " + ex.getMethod() + " nao e suportado por este endpoint"));
     }
 
     @ExceptionHandler(Exception.class)

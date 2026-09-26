@@ -117,8 +117,86 @@ kubectl apply -k k8s/overlays/local
 
 Fluxo ponta a ponta validado com `curl` junto com o
 `sistema-principal-veiculos`. Ver [ARCHITECTURE.md](ARCHITECTURE.md) para os
-detalhes arquiteturais e o resumo de entrega do repositorio para os
-comandos usados e as respostas recebidas.
+detalhes arquiteturais.
+
+## Testando manualmente (exemplos de requisicao)
+
+Exemplos prontos para os 5 endpoints deste servico (porta `8082`).
+
+> **Atencao (Windows/PowerShell):** o `curl` do PowerShell e um apelido
+> (alias) para `Invoke-WebRequest` e nao aceita a sintaxe `-H`/`-d` do
+> curl tradicional. Chamar `curl.exe` diretamente tambem pode falhar,
+> porque o parsing de linha de comando do Windows reinterpreta as aspas
+> do JSON antes de repassar ao programa — o servidor acaba recebendo um
+> JSON corrompido e devolve `400`/`500`. **No PowerShell, use sempre
+> `Invoke-RestMethod`**, como nos exemplos abaixo. Em Linux/Mac/Git Bash,
+> os exemplos com `curl` funcionam normalmente.
+
+### Listar disponiveis (`GET /veiculos/disponiveis`)
+
+```bash
+curl http://localhost:8082/veiculos/disponiveis
+```
+```powershell
+Invoke-RestMethod -Method Get -Uri "http://localhost:8082/veiculos/disponiveis"
+```
+
+### Listar vendidos (`GET /veiculos/vendidos`)
+
+```bash
+curl http://localhost:8082/veiculos/vendidos
+```
+```powershell
+Invoke-RestMethod -Method Get -Uri "http://localhost:8082/veiculos/vendidos"
+```
+
+### Sincronizar veiculo (`POST /veiculos/sync`) — uso interno, chamado pelo sistema-principal-veiculos
+
+```bash
+curl -X POST http://localhost:8082/veiculos/sync \
+  -H "Content-Type: application/json" \
+  -d '{"id":1,"marca":"Fiat","modelo":"Uno","ano":2020,"cor":"Branco","preco":35000.00,"status":"DISPONIVEL"}'
+```
+```powershell
+Invoke-RestMethod -Method Post -Uri "http://localhost:8082/veiculos/sync" -ContentType "application/json" -Body '{"id":1,"marca":"Fiat","modelo":"Uno","ano":2020,"cor":"Branco","preco":35000.00,"status":"DISPONIVEL"}'
+```
+
+### Efetuar venda (`POST /vendas`)
+
+```bash
+curl -X POST http://localhost:8082/vendas \
+  -H "Content-Type: application/json" \
+  -d '{"veiculoId":1,"cpfComprador":"11144477735"}'
+```
+```powershell
+Invoke-RestMethod -Method Post -Uri "http://localhost:8082/vendas" -ContentType "application/json" -Body '{"veiculoId":1,"cpfComprador":"11144477735"}'
+```
+
+*(o CPF precisa ter digito verificador valido — o dominio valida modulo 11, nao so o formato)*
+
+### Webhook de pagamento (`POST /webhooks/pagamento`)
+
+```bash
+curl -X POST http://localhost:8082/webhooks/pagamento \
+  -H "Content-Type: application/json" \
+  -d '{"codigoPagamento":"<codigo-recebido-na-venda>","resultado":"APROVADO"}'
+```
+```powershell
+Invoke-RestMethod -Method Post -Uri "http://localhost:8082/webhooks/pagamento" -ContentType "application/json" -Body '{"codigoPagamento":"<codigo-recebido-na-venda>","resultado":"APROVADO"}'
+```
+
+*(valores possiveis de `resultado`: `APROVADO`, `CANCELADO`)*
+
+### Respostas de erro possiveis
+
+| Situacao | Status |
+|---|---|
+| Campo obrigatorio faltando ou invalido | `400` |
+| CPF invalido (digito verificador) | `400` |
+| Corpo da requisicao ausente ou JSON mal formado | `400` |
+| Veiculo/venda nao encontrado | `404` |
+| Vender veiculo indisponivel | `409` |
+| Metodo HTTP nao suportado nessa rota | `405` |
 
 ## Testes
 
@@ -151,8 +229,8 @@ JaCoCo em `target/site/jacoco/index.html` apos `./mvnw test`.
   cenario.
 
 **Ultima medicao:** 27 testes, 0 falhas, cobertura de linha ~86%
-(acima do minimo de 80% exigido pelo enunciado). Ver o resumo de
-entrega na raiz do repositorio para o detalhamento.
+(acima do minimo de 80% exigido pelo enunciado). Ver
+[ARCHITECTURE.md](ARCHITECTURE.md) para o detalhamento por classe.
 
 ## Em construcao
 
