@@ -180,13 +180,20 @@ Invoke-RestMethod -Method Get -Uri "http://localhost:8082/veiculos/vendidos"
 
 ### Sincronizar veiculo (`POST /veiculos/sync`) — uso interno, chamado pelo sistema-principal-veiculos
 
+Dois veiculos, usados nos exemplos de venda abaixo (com precos diferentes,
+para ver a ordenacao por preco em `/veiculos/disponiveis`):
+
 ```bash
 curl -X POST http://localhost:8082/veiculos/sync \
   -H "Content-Type: application/json" \
   -d '{"id":1,"marca":"Fiat","modelo":"Uno","ano":2020,"cor":"Branco","preco":35000.00,"status":"DISPONIVEL"}'
+curl -X POST http://localhost:8082/veiculos/sync \
+  -H "Content-Type: application/json" \
+  -d '{"id":2,"marca":"VW","modelo":"Gol","ano":2019,"cor":"Vermelho","preco":25000.00,"status":"DISPONIVEL"}'
 ```
 ```powershell
 Invoke-RestMethod -Method Post -Uri "http://localhost:8082/veiculos/sync" -ContentType "application/json" -Body '{"id":1,"marca":"Fiat","modelo":"Uno","ano":2020,"cor":"Branco","preco":35000.00,"status":"DISPONIVEL"}'
+Invoke-RestMethod -Method Post -Uri "http://localhost:8082/veiculos/sync" -ContentType "application/json" -Body '{"id":2,"marca":"VW","modelo":"Gol","ano":2019,"cor":"Vermelho","preco":25000.00,"status":"DISPONIVEL"}'
 ```
 
 ### Efetuar venda (`POST /vendas`)
@@ -203,12 +210,18 @@ Invoke-RestMethod -Method Post -Uri "http://localhost:8082/vendas" -ContentType 
 *(o CPF precisa ter digito verificador valido — o dominio valida modulo 11, nao so o formato)*
 
 O campo `dataVenda` e **opcional**: se nao for enviado, o servidor usa a
-data/hora atual. Para informar uma data explicita:
+data/hora atual. Para informar uma data explicita (formato
+`AAAA-MM-DDTHH:MM:SS`; so a data, sem a hora, e recusada com `400`), use
+outro veiculo ainda `DISPONIVEL` — o veiculo 1 ja foi reservado pelo exemplo
+acima:
 
 ```bash
 curl -X POST http://localhost:8082/vendas \
   -H "Content-Type: application/json" \
-  -d '{"veiculoId":1,"cpfComprador":"11144477735","dataVenda":"2026-01-15T10:30:00"}'
+  -d '{"veiculoId":2,"cpfComprador":"11144477735","dataVenda":"2026-01-15T10:30:00"}'
+```
+```powershell
+Invoke-RestMethod -Method Post -Uri "http://localhost:8082/vendas" -ContentType "application/json" -Body '{"veiculoId":2,"cpfComprador":"11144477735","dataVenda":"2026-01-15T10:30:00"}'
 ```
 
 ### Webhook de pagamento (`POST /webhooks/pagamento`)
