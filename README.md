@@ -200,10 +200,8 @@ Invoke-RestMethod -Method Post -Uri "http://localhost:8082/webhooks/pagamento" -
 
 ## Testes
 
-```bash
 ./mvnw test      # unitarios + integracao (Testcontainers) + BDD (Cucumber)
 ./mvnw verify     # idem, e falha o build se a cobertura de linha ficar < 80%
-```
 
 Requer Docker rodando (os testes de integracao e o BDD sobem um
 Postgres real via Testcontainers, container por teste). Cobertura via
@@ -214,9 +212,20 @@ JaCoCo em `target/site/jacoco/index.html` apos `./mvnw test`.
   Os UseCases devolvem a Entity de dominio (`Veiculo`/`Venda`, ou
   `List<Veiculo>`), nao mais o DTO de resposta, entao as asserções
   verificam a Entity retornada.
+- **Value Objects** (`domain/vo/*Test.java`): `CpfTest` e `PrecoTest`
+  cobrem os casos de borda de cada um isoladamente (CPF nulo, tamanho
+  errado, digitos repetidos, digito verificador invalido, formatacao;
+  preco nulo, zero, negativo, arredondamento), sem depender de nenhuma
+  outra camada.
 - **Presenter** (`adapter/in/presenter/**/*PresenterTest.java`):
   `VeiculoPresenterTest` e `VendaPresenterTest` cobrem a conversao para
   `VeiculoResponse`/`VendaResponse`, isolada do UseCase.
+- **Client HTTP** (`adapter/out/venda/client/*Test.java`):
+  `SistemaPrincipalHttpAdapterTest` cobre os 3 mapeamentos de status
+  enviados ao sistema-principal-veiculos (pendente -> reservado,
+  aprovado -> vendido, cancelado -> disponivel), mockando o
+  `RestTemplate`, alem do caso de falha de rede sendo tratada sem
+  quebrar o fluxo.
 - **Integracao** (`adapter/out/**/*IT.java`): `VeiculoRepositoryAdapterIT`
   e `VendaRepositoryAdapterIT`, `@DataJpaTest` contra Postgres real
   (Testcontainers, nao H2).
@@ -228,9 +237,8 @@ JaCoCo em `target/site/jacoco/index.html` apos `./mvnw test`.
   nesse teste, ja que a comunicacao com o outro servico nao e o alvo do
   cenario.
 
-**Ultima medicao:** 27 testes, 0 falhas, cobertura de linha ~86%
-(acima do minimo de 80% exigido pelo enunciado). Ver
-[ARCHITECTURE.md](ARCHITECTURE.md) para o detalhamento por classe.
+**Ultima medicao:** cobertura de 98% de instrucoes e 90% de branches
+(JaCoCo).
 
 ## Em construcao
 
