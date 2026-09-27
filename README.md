@@ -82,9 +82,13 @@ Clone [infra-databases-revenda-veiculos](https://github.com/eduardofrauches/infr
 ./mvnw spring-boot:run
 ```
 
-Para o fluxo completo, suba também o
+**Fluxo completo:** suba os bancos e **os dois serviços antes de cadastrar
+veículos** no
 [sistema-principal-veiculos](https://github.com/eduardofrauches/sistema-principal-veiculos)
-(porta `8081`).
+(porta `8081`). O cadastro é enviado a este serviço no momento em que
+acontece: um veículo cadastrado com este serviço fora do ar não aparece em
+`/veiculos/disponiveis`. Para sincronizar de novo, basta editar o veículo no
+sistema-principal (`PUT /veiculos/{id}`).
 
 A aplicação sobe na porta `8082` e conecta no PostgreSQL do
 container `revenda-postgres-vendas`
@@ -124,7 +128,7 @@ kubectl port-forward svc/servico-vendas-veiculos 8082:8082
 
 - Para o fluxo completo, repita os passos 2 e 3 no
   [sistema-principal-veiculos](https://github.com/eduardofrauches/sistema-principal-veiculos)
-  (porta `8081`).
+  (porta `8081`) **antes de cadastrar veiculos**.
 - Se este servico ja estiver rodando localmente com `./mvnw spring-boot:run`,
   pare-o antes do `port-forward` (mesma porta `8082`).
 - Para atualizar a imagem depois de mudar o codigo: rode de novo o
