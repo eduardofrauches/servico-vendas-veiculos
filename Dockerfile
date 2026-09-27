@@ -1,5 +1,5 @@
 # --- Stage 1: build (JDK + Maven) ---
-FROM eclipse-temurin:17-jdk-alpine AS build
+FROM eclipse-temurin:17-jdk-noble AS build
 WORKDIR /app
 
 # Baixa as dependencias primeiro (cache de camada) usando o wrapper do proprio projeto.
@@ -11,10 +11,10 @@ COPY src ./src
 RUN ./mvnw -B -q clean package -DskipTests
 
 # --- Stage 2: runtime (so JRE) ---
-FROM eclipse-temurin:17-jre-alpine AS runtime
+FROM eclipse-temurin:17-jre-noble AS runtime
 WORKDIR /app
 
-RUN addgroup -S spring && adduser -S spring -G spring
+RUN groupadd --system spring && useradd --system --gid spring spring
 COPY --from=build /app/target/servico-vendas-veiculos-*.jar app.jar
 RUN chown spring:spring app.jar
 USER spring
