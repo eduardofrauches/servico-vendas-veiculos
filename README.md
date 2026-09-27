@@ -250,8 +250,10 @@ Invoke-RestMethod -Method Post -Uri "http://localhost:8082/webhooks/pagamento" -
 
 ## Testes
 
+```bash
 ./mvnw test      # unitarios + integracao (Testcontainers) + BDD (Cucumber)
-./mvnw verify     # idem, e falha o build se a cobertura de linha ficar < 80%
+./mvnw verify    # idem, e falha o build se a cobertura de linha ficar < 80%
+```
 
 Requer Docker rodando (os testes de integracao e o BDD sobem um
 Postgres real via Testcontainers, container por teste). Cobertura via
@@ -287,8 +289,8 @@ JaCoCo em `target/site/jacoco/index.html` apos `./mvnw test`.
   nesse teste, ja que a comunicacao com o outro servico nao e o alvo do
   cenario.
 
-**Ultima medicao:** cobertura de 98% de instrucoes e 90% de branches
-(JaCoCo).
+**Ultima medicao:** 58 testes, 0 falhas; cobertura de 99,6% de linhas,
+91,3% de branches e 99,0% de instrucoes (JaCoCo).
 
 ## Em construcao
 
