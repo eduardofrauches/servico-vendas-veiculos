@@ -157,7 +157,13 @@ src/main/java/com/revendaveiculos/servicovendas/
     `VeiculoNaoDisponivelException` -> `409`. Note que ha DUAS
     exceptions distintas para veiculo: `VeiculoNaoEncontradoException`
     (id nao existe, 404) vs `VeiculoNaoDisponivelException` (existe mas
-    nao esta `DISPONIVEL`, 409) — nao confundir.
+    nao esta `DISPONIVEL`, 409) — nao confundir. **Adicionado em
+    26/09**, apos teste manual ponta a ponta ter revelado dois casos
+    que caiam no handler generico (`500`) em vez de um status
+    especifico: `HttpMessageNotReadableException` -> `400` (corpo da
+    requisicao ausente ou JSON mal formado) e
+    `HttpRequestMethodNotSupportedException` -> `405` (metodo HTTP nao
+    suportado na rota).
 11. **Persistencia**: `ddl-auto: update` (sem Flyway/Liquibase ainda) —
     decisao pragmatica para esta etapa inicial, documentada como
     pendencia.
@@ -190,6 +196,17 @@ comandos `curl` exatos e as respostas recebidas.
   reservava e salvava o veiculo **antes** de validar o CPF; corrigido
   invertendo a ordem (`Cpf.de(...)` roda primeiro) para nunca deixar um
   veiculo reservado sem venda associada quando o CPF e invalido.
+- **Value Objects** (`domain/vo/*Test.java`): `CpfTest` e `PrecoTest`,
+  adicionados em 26/09 ao revisar a cobertura, cobrem os casos de borda
+  de cada um isoladamente (CPF nulo, tamanho errado, digitos repetidos,
+  digito verificador invalido, formatacao; preco nulo, zero, negativo,
+  arredondamento).
+- **Client HTTP** (`adapter/out/venda/client/*Test.java`):
+  `SistemaPrincipalHttpAdapterTest`, tambem adicionado em 26/09, cobre
+  os 3 mapeamentos de status enviados ao sistema-principal-veiculos
+  (pendente -> reservado, aprovado -> vendido, cancelado ->
+  disponivel), mockando o `RestTemplate`, alem do caso de falha de rede
+  sendo tratada sem quebrar o fluxo.
 - **Integracao** (`*RepositoryAdapterIT.java`): `@DataJpaTest` +
   `@AutoConfigureTestDatabase(replace = NONE)` + Testcontainers
   (`postgres:16-alpine` de verdade, nao H2) — uma para
@@ -209,23 +226,19 @@ comandos `curl` exatos e as respostas recebidas.
   decisao deliberada para que `mvnw test` sozinho rode unitarios +
   integracao + BDD, sem precisar de `mvnw verify`/Failsafe.
 - **JaCoCo** (`jacoco-maven-plugin`), com **gate de cobertura minima de
-  80% de linha, bloqueante, bound a fase `verify`**
+  80% de instrucoes, bloqueante, bound a fase `verify`**
   (`mvnw verify` falha se ficar abaixo — `mvnw test` sozinho so mede e
   gera o relatorio, nao bloqueia). Exclusoes do calculo: `*Application`,
   `infrastructure/config/**`, `dto/**`, `persistence/jpa/{entity,mapper}/**`,
   `domain/exception/**`, `adapter/in/exception/**` (boilerplate sem
   logica de negocio) — mesmo espirito das `sonar.coverage.exclusions`
   do `oficina-service-mvp` de referencia.
-- **Ultima medicao:** 27 testes (14 unitarios, incluindo
-  `VeiculoPresenterTest` e `VendaPresenterTest` adicionados junto com
-  os Presenters — ver decisao 1a — + 8 integracao + 2 cenarios BDD/8
-  steps), 0 falhas, **~86% de cobertura de linha** — acima do minimo de
-  80% exigido pelo enunciado, confirmado com `mvnw verify`
-  (`jacoco:check` -> "All coverage checks have been met"). Unico ponto
-  sem cobertura relevante: `SistemaPrincipalHttpAdapter` (0%), porque e
-  justamente o bean mockado no BDD — se isso incomodar no futuro, dá
-  pra somar um teste de unidade simples so pra esse adapter (mockando o
-  `RestTemplate`).
+- **Ultima medicao (26/09):** apos adicionar os testes de `domain.vo` e
+  do `adapter.out.venda.client` (os dois unicos pontos ainda fracos,
+  com 53%/46% e 0% de cobertura, respectivamente), a cobertura total do
+  projeto subiu para **98% de instrucoes e 90% de branches** (JaCoCo),
+  bem acima do minimo de 80% exigido, confirmado com `mvnw verify`
+  (`jacoco:check` -> "All coverage checks have been met").
 
 ## O que ainda falta (proximas etapas)
 
