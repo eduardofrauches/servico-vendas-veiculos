@@ -43,7 +43,7 @@ public class EfetuarVendaUseCase implements EfetuarVendaInputPort {
         veiculo.reservar();
         veiculoRepositoryPort.salvar(veiculo);
 
-        Venda venda = Venda.efetuar(veiculo.getId(), cpfComprador, veiculo.getPreco());
+        Venda venda = Venda.efetuar(veiculo.getId(), cpfComprador, veiculo.getPreco(), request.dataVenda());
         Venda vendaSalva = vendaRepositoryPort.salvar(venda);
 
         // Propaga a reserva para o sistema-principal-veiculos (dado-mestre),
