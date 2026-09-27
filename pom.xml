@@ -20,7 +20,7 @@
 
     <properties>
         <java.version>17</java.version>
-        <jacoco.version>0.8.12</jacoco.version>
+        <jacoco.version>0.8.15</jacoco.version>
         <cucumber.version>7.18.1</cucumber.version>
         <!-- Cobertura minima exigida pelo enunciado para este servico -->
         <jacoco.line.coverage.minimum>0.80</jacoco.line.coverage.minimum>
