@@ -24,6 +24,12 @@
         <cucumber.version>7.18.1</cucumber.version>
         <!-- Cobertura minima exigida pelo enunciado para este servico -->
         <jacoco.line.coverage.minimum>0.80</jacoco.line.coverage.minimum>
+        <!-- Fixa o Surefire numa versao que conta corretamente os cenarios
+             do Cucumber. A versao 3.5.3 (herdada do Spring Boot 3.5.5) tem
+             um bug que faz RunCucumberTest reportar "Tests run: 0", entao
+             cenarios BDD falhando nao derrubavam o build (mvnw verify
+             terminava BUILD SUCCESS mesmo com testes falhando). -->
+        <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
     </properties>
 
     <dependencyManagement>

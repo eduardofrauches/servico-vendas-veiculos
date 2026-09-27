@@ -174,6 +174,15 @@ Invoke-RestMethod -Method Post -Uri "http://localhost:8082/vendas" -ContentType 
 
 *(o CPF precisa ter digito verificador valido — o dominio valida modulo 11, nao so o formato)*
 
+O campo `dataVenda` e **opcional**: se nao for enviado, o servidor usa a
+data/hora atual. Para informar uma data explicita:
+
+```bash
+curl -X POST http://localhost:8082/vendas \
+  -H "Content-Type: application/json" \
+  -d '{"veiculoId":1,"cpfComprador":"11144477735","dataVenda":"2026-01-15T10:30:00"}'
+```
+
 ### Webhook de pagamento (`POST /webhooks/pagamento`)
 
 ```bash

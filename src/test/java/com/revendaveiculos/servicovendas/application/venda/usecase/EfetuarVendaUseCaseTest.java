@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -64,6 +65,33 @@ class EfetuarVendaUseCaseTest {
         assertThat(veiculoCaptor.getValue().getStatus()).isEqualTo(StatusVeiculo.RESERVADO);
 
         verify(sistemaPrincipalPort).notificarResultadoVenda(any(Venda.class));
+    }
+
+    @Test
+    void deveUsarDataVendaInformadaNoRequestQuandoPresente() {
+        useCase = new EfetuarVendaUseCase(veiculoRepositoryPort, vendaRepositoryPort, sistemaPrincipalPort);
+
+        Veiculo veiculo = veiculoDisponivel();
+        when(veiculoRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(veiculo));
+        when(vendaRepositoryPort.salvar(any(Venda.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        LocalDateTime dataInformada = LocalDateTime.of(2026, 1, 15, 10, 30);
+        Venda response = useCase.efetuar(new EfetuarVendaRequest(1L, "529.982.247-25", dataInformada));
+
+        assertThat(response.getDataVenda()).isEqualTo(dataInformada);
+    }
+
+    @Test
+    void deveGerarDataVendaAutomaticaQuandoNaoInformadaNoRequest() {
+        useCase = new EfetuarVendaUseCase(veiculoRepositoryPort, vendaRepositoryPort, sistemaPrincipalPort);
+
+        Veiculo veiculo = veiculoDisponivel();
+        when(veiculoRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(veiculo));
+        when(vendaRepositoryPort.salvar(any(Venda.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Venda response = useCase.efetuar(new EfetuarVendaRequest(1L, "529.982.247-25"));
+
+        assertThat(response.getDataVenda()).isNotNull();
     }
 
     @Test

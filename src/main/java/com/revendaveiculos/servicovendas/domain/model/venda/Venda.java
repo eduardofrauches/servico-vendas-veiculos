@@ -39,7 +39,16 @@ public class Venda {
      * veiculo correspondente antes/depois de chamar este metodo.
      */
     public static Venda efetuar(Long veiculoId, Cpf cpfComprador, Preco valorVenda) {
-        return new Venda(null, veiculoId, cpfComprador, LocalDateTime.now(), valorVenda,
+        return efetuar(veiculoId, cpfComprador, valorVenda, null);
+    }
+
+    /**
+     * Efetua uma nova venda com data explicita (ex.: informada pelo
+     * comprador via API). Se dataVenda for null, usa o momento atual.
+     */
+    public static Venda efetuar(Long veiculoId, Cpf cpfComprador, Preco valorVenda, LocalDateTime dataVenda) {
+        LocalDateTime dataEfetiva = dataVenda != null ? dataVenda : LocalDateTime.now();
+        return new Venda(null, veiculoId, cpfComprador, dataEfetiva, valorVenda,
                 StatusVenda.PENDENTE, UUID.randomUUID().toString());
     }
 
