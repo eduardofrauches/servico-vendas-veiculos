@@ -104,14 +104,32 @@ manifests desse repositorio antes de subir este servico no cluster**
 (falham a `readinessProbe`/`livenessProbe` em `/actuator/health`).
 
 ```bash
-# 1. Bancos (repositorio infra-databases-revenda-veiculos)
-kubectl apply -k .
-kubectl rollout status statefulset/postgres-vendas --timeout=120s
+# 0. Cluster local (requer Minikube e kubectl instalados)
+minikube start
 
-# 2. Este servico (a partir deste repositorio)
-minikube image load servico-vendas-veiculos:local
+# 1. Bancos (a partir do repositorio infra-databases-revenda-veiculos)
+kubectl apply -k .
+kubectl rollout status statefulset/postgres-vendas --timeout=300s
+
+# 2. Este servico (a partir deste repositorio): constroi a imagem
+#    dentro do Minikube e aplica os manifests
+minikube image build -t servico-vendas-veiculos:local .
 kubectl apply -k k8s/overlays/local
+kubectl rollout status deployment/servico-vendas-veiculos --timeout=300s
+
+# 3. Acesso (o Service e interno ao cluster): deixe rodando em outro
+#    terminal e use http://localhost:8082
+kubectl port-forward svc/servico-vendas-veiculos 8082:8082
 ```
+
+- Para o fluxo completo, repita os passos 2 e 3 no
+  [sistema-principal-veiculos](https://github.com/eduardofrauches/sistema-principal-veiculos)
+  (porta `8081`).
+- Se este servico ja estiver rodando localmente com `./mvnw spring-boot:run`,
+  pare-o antes do `port-forward` (mesma porta `8082`).
+- Para atualizar a imagem depois de mudar o codigo: rode de novo o
+  `minikube image build` do passo 2 e depois
+  `kubectl rollout restart deployment/servico-vendas-veiculos`.
 
 ## Testado manualmente
 
